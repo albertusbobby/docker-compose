@@ -11,7 +11,7 @@ Kumpulan docker compose buat kebutuhan development lokal. Tiap service punya fol
 | `redis-insight/` | Redis Insight (GUI) | `5540` |
 | `cloudbeaver/` | CloudBeaver (DB GUI) | `8978` |
 | `kafka/` | Kafka + Kafka UI | `29092`/`29093` (Kafka), `8999` (UI) |
-| `monitoring/` | Prometheus + Grafana | `9090` (Prometheus), `3000` (Grafana) |
+| `monitoring/` | Prometheus + Grafana + Zipkin | `9090` (Prometheus), `3000` (Grafana), `9411` (Zipkin) |
 
 ## Prasyarat: bikin network dulu
 
@@ -91,6 +91,7 @@ docker compose down -v
 | Kafka UI | http://localhost:8999 |
 | Prometheus | http://localhost:9090 |
 | Grafana | http://localhost:3000 (login: lihat `.env` atau default `admin`/`admin`) |
+| Zipkin | http://localhost:9411 |
 
 Detail lebih lengkap per service ada di README masing-masing folder (kalau tersedia), misalnya `kafka/README.md`.
 

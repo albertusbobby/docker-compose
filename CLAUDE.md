@@ -1,2 +1,3 @@
 1. kalo saya tidak explicit sebut tentang setup docker compose dibagian network, asumsikan selalu pakai dev-network sebagai default network
 2. selalu update README.md yang ada di masing-masing folder dev stack ketika mengubah file docker-compose
+3. dalam memilih image, kalau tidak disebut versi berapa, cari dulu versi terakhir dan set explicit di docker-compose.yml jadi biar ga set "latest" jadi langsung tau versi berapa

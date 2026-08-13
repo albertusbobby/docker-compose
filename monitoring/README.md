@@ -1,6 +1,6 @@
-# Monitoring (Prometheus + Grafana)
+# Monitoring (Prometheus + Grafana + Zipkin)
 
-Stack monitoring dasar: Prometheus buat scrape & simpan metrics, Grafana buat visualisasi.
+Stack monitoring dasar: Prometheus buat scrape & simpan metrics, Zipkin buat nyimpen distributed trace, Grafana buat visualisasi keduanya (metrics + trace) dalam satu tempat.
 
 ## Isi `docker-compose.yml`
 
@@ -17,20 +17,48 @@ Stack monitoring dasar: Prometheus buat scrape & simpan metrics, Grafana buat vi
 | | `environment: GF_SECURITY_ADMIN_USER/PASSWORD` | Kredensial admin, ambil dari `.env`, fallback `admin`/`admin` |
 | | `volumes: grafana_data` | Named volume, nyimpen dashboard, user, konfigurasi Grafana |
 | | `volumes: ./grafana/provisioning` | Mount provisioning (auto-setup datasource tanpa config manual di UI) |
-| | `depends_on: prometheus` | Grafana nunggu Prometheus jalan dulu sebelum start |
+| | `depends_on: prometheus, zipkin` | Grafana nunggu Prometheus & Zipkin jalan dulu sebelum start |
+| **zipkin** | `image: openzipkin/zipkin` | Image resmi Zipkin — server penyimpan & UI distributed trace |
+| | `ports: 9411` | Port akses web UI Zipkin sekaligus endpoint buat app ngirim trace (`POST /api/v2/spans`) |
+| | `extra_hosts: host.docker.internal` | Biar service yang jalan di host (misal `personal-service`) bisa kirim trace ke Zipkin lewat hostname ini kalau perlu resolve balik |
 
-Keduanya satu network `dev-network`, jadi Grafana bisa akses Prometheus pakai hostname `prometheus`.
+> Catatan: Zipkin di sini pakai **in-memory storage** (default image, tanpa storage backend seperti Elasticsearch/Cassandra) — jadi data trace hilang tiap kali container di-restart. Cukup buat kebutuhan dev/debug lokal.
+
+Semua service satu network `dev-network`, jadi Grafana bisa akses Prometheus & Zipkin pakai hostname container (`prometheus`, `zipkin`).
 
 ## File Pendukung
 
 - **`prometheus.yml`** — config utama Prometheus. Berisi `scrape_interval` (tiap berapa detik ambil metrics) dan `scrape_configs` (daftar target yang di-scrape). Saat ini scrape dirinya sendiri (`localhost:9090`) dan `personal-service` (`host.docker.internal:8080`, service Spring Boot yang jalan di host, di-scrape lewat `/personal-service/actuator/prometheus`) — tambah target baru di sini kalau mau monitor service lain (contoh: exporter buat postgres/redis/kafka).
 
-- **`grafana/provisioning/datasources/datasource.yml`** — auto-provisioning datasource Grafana. Begini Grafana begitu start udah otomatis punya datasource **Prometheus** (`http://prometheus:9090`) tanpa perlu setup manual lewat UI.
+- **`grafana/provisioning/datasources/datasource.yml`** — auto-provisioning datasource Grafana. Begitu Grafana start, udah otomatis punya 2 datasource tanpa setup manual lewat UI:
+  - **Prometheus** (`http://prometheus:9090`) — metrics, jadi default datasource
+  - **Zipkin** (`http://zipkin:9411`) — buat lihat/cari trace langsung dari Grafana (Explore → pilih datasource Zipkin)
 
 - **`.env.example`** — template kredensial admin Grafana (`GRAFANA_USER`, `GRAFANA_PASSWORD`). Copy jadi `.env` untuk override:
   ```bash
   cp .env.example .env
   ```
+
+## Ngirim Trace dari Aplikasi ke Zipkin
+
+Supaya trace muncul di Zipkin/Grafana, aplikasi (misal `personal-service` yang Spring Boot) perlu dikonfigurasi kirim trace ke endpoint Zipkin. Karena Zipkin jalan di Docker dan app-nya di host, endpoint-nya pakai `host.docker.internal` juga (kebalikan arah dari Prometheus yang nge-scrape):
+
+```yaml
+# application.yml
+management:
+  tracing:
+    sampling:
+      probability: 1.0 # 100% trace buat dev, turunin kalau di prod
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+```
+
+Dependency yang dibutuhkan (Spring Boot 3.x + Micrometer Tracing):
+```
+micrometer-tracing-bridge-brave
+zipkin-reporter-brave
+```
 
 ## Cara Pakai
 
