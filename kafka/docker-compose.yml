@@ -82,7 +82,7 @@ services:
 
 
     networks:
-      - kafka-net
+      - dev-network
 
 
   kafka-ui:
@@ -100,7 +100,7 @@ services:
       DYNAMIC_CONFIG_ENABLED: "true"
 
     networks:
-      - kafka-net
+      - dev-network
 
 
 
@@ -109,4 +109,5 @@ volumes:
 
 
 networks:
-  kafka-net:
+  dev-network:
+    external: true

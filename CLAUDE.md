@@ -1,0 +1,1 @@
+1. kalo saya tidak explicit sebut tentang setup docker compose dibagian network, asumsikan selalu pakai dev-network sebagai default network
