@@ -1,1 +1,2 @@
 1. kalo saya tidak explicit sebut tentang setup docker compose dibagian network, asumsikan selalu pakai dev-network sebagai default network
+2. selalu update README.md yang ada di masing-masing folder dev stack ketika mengubah file docker-compose
