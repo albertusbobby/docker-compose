@@ -12,6 +12,7 @@ Kumpulan docker compose buat kebutuhan development lokal. Tiap service punya fol
 | `cloudbeaver/` | CloudBeaver (DB GUI) | `8978` |
 | `kafka/` | Kafka + Kafka UI | `29092`/`29093` (Kafka), `8999` (UI) |
 | `monitoring/` | Prometheus + Grafana + Zipkin | `9090` (Prometheus), `3000` (Grafana), `9411` (Zipkin) |
+| `mockoon/` | Mockoon CLI (mock API) | `3001` |
 
 ## Prasyarat: bikin network dulu
 
@@ -38,7 +39,7 @@ docker compose up -d
 Jalankan semua service sekaligus:
 
 ```bash
-for d in postgres redis redis-insight cloudbeaver kafka monitoring; do
+for d in postgres redis redis-insight cloudbeaver kafka monitoring mockoon; do
   (cd "$d" && docker compose up -d)
 done
 ```
@@ -92,6 +93,7 @@ docker compose down -v
 | Prometheus | http://localhost:9090 |
 | Grafana | http://localhost:3000 (login: lihat `.env` atau default `admin`/`admin`) |
 | Zipkin | http://localhost:9411 |
+| Mockoon (Surrounding) | http://localhost:3001 |
 
 Detail lebih lengkap per service ada di README masing-masing folder (kalau tersedia), misalnya `kafka/README.md`.
 

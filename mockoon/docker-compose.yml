@@ -1,0 +1,20 @@
+services:
+  surrounding-mockoon:
+    image: mockoon/cli:9.8.0
+    container_name: surrounding-mockoon
+    restart: unless-stopped
+    command:
+      - "--data"
+      - "/data/surrounding.json"
+      - "--port"
+      - "3001"
+    ports:
+      - "3001:3001"
+    volumes:
+      - "${HOME}/Library/Application Support/mockoon/storage/surrounding.json:/data/surrounding.json:ro"
+    networks:
+      - dev-network
+
+networks:
+  dev-network:
+    external: true
